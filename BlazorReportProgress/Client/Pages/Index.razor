@@ -1,0 +1,60 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager navigationManager
+@inject HttpClient http
+
+<PageTitle>Index</PageTitle>
+
+<h1>Slow Process!</h1>
+
+<p>
+    <button class="btn btn-primary" disabled=@processRunning @onclick=@StartSlowProcess>@ButtonLabel()</button>
+</p>
+
+<p>Progress: @progressMessage</p>
+
+@if (results == null)
+{
+    <p>Please start the process</p>
+}
+else
+{
+    <p>Results are : @(String.Join(',', results))</p>
+}
+
+@code {
+    private string progressMessage = "";
+    private bool processRunning;
+    private int[]? results;
+    private System.Guid guid = new();
+    private HubConnection? hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+        .WithUrl(navigationManager.ToAbsoluteUri("/hub/progresshub"))
+        .Build();
+
+        await hubConnection.StartAsync();
+
+        hubConnection.On<string>("ProgressReport", (message) =>
+        {
+            progressMessage = message;
+            StateHasChanged();
+        });
+    }
+
+    private async Task StartSlowProcess()
+    {
+        processRunning = true;
+        results = null;
+
+        StateHasChanged();
+
+        results = await http.GetFromJsonAsync<int[]>($"api/slowprocess/{guid.ToString()}");
+
+        processRunning = false;
+    }
+
+    private string ButtonLabel() => processRunning ? "Please wait..." : "Start Slow Process";
+}
