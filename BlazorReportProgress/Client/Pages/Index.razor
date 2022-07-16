@@ -26,7 +26,7 @@ else
     private string progressMessage = "";
     private bool processRunning;
     private int[]? results;
-    private System.Guid guid = new();
+    private string? hubID;
     private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
@@ -36,6 +36,8 @@ else
         .Build();
 
         await hubConnection.StartAsync();
+
+        hubID = hubConnection.ConnectionId;
 
         hubConnection.On<string>("ProgressReport", (message) =>
         {
@@ -51,7 +53,7 @@ else
 
         StateHasChanged();
 
-        results = await http.GetFromJsonAsync<int[]>($"api/slowprocess/{guid.ToString()}");
+        results = await http.GetFromJsonAsync<int[]>($"api/slowprocess/{hubID}");
 
         processRunning = false;
     }

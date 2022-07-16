@@ -25,18 +25,20 @@ namespace BlazorReportProgress.Server.Controllers
         {
             List<int> retVal = new();
 
-            _hubController.Clients.All.SendAsync("ProgressReport", "Starting...");
+            _logger.LogInformation("Incoming call from ClientID : {0}", ClientID);
+
+            _hubController.Clients.Client(ClientID).SendAsync("ProgressReport", "Starting...");
             Thread.Sleep(1000);
 
             for (int loop = 0; loop < 10; loop++)
             {
-                _hubController.Clients.All.SendAsync("ProgressReport", loop.ToString());
+                _hubController.Clients.Client(ClientID).SendAsync("ProgressReport", loop.ToString());
 
                 retVal.Add(loop);
                 Thread.Sleep(500);
             }
 
-            _hubController.Clients.All.SendAsync("ProgressReport", "Done!");
+            _hubController.Clients.Client(ClientID).SendAsync("ProgressReport", "Done!");
 
             return retVal;
         }
