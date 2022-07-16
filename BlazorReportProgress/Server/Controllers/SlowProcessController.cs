@@ -25,7 +25,7 @@ namespace BlazorReportProgress.Server.Controllers
         {
             List<int> retVal = new();
 
-            _logger.LogInformation("Incoming call from ClientID : {0}", ClientID);
+            _logger.LogInformation("Incoming call from ClientID : {ClientID}", ClientID);
 
             _hubController.Clients.Client(ClientID).SendAsync("ProgressReport", "Starting...");
             Thread.Sleep(1000);
